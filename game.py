@@ -33,12 +33,18 @@ class Mario():
 		self.prevY = 0
 		self.numFramesInAir = 0
 		self.rightFacing = True
+		
+		self.images = []
+		self.images.append(pygame.image.load("mario1.png"))
+		self.images.append(pygame.image.load("mario2.png"))
+		self.images.append(pygame.image.load("mario3.png"))
+		self.images.append(pygame.image.load("mario4.png"))
+		self.images.append(pygame.image.load("mario5.png"))
 
-	
 	def update(self):
 		self.vertVelocity += 1.2
 		self.y += self.vertVelocity
-		self.numFramesInAir + 1
+		self.numFramesInAir += 1
 
 		if(self.y > 400 - self.h):
 			self.vertVelocity = 0
@@ -76,13 +82,12 @@ class Mario():
 		self.prevX = self.x
 		self.prevY = self.y
 	
-
 	def changeImageState(self):
-		self.currentImage+1
+		self.currentImage += 1
 		if(self.currentImage > 4):
 			self.currentImage = 0
-		self.image_url = "mario" + (self.currentImage+1) + ".png"
-	
+		self.image = self.images[self.currentImage]
+
 	def isMario(self):
 		return True
 	
@@ -100,6 +105,7 @@ class Mario():
 class Pipe():
 	def __init__(self, x, y, w, h, image_url):
 		Sprite.__init__(self, x, y, w, h, image_url)
+		self.rightFacing = None
 	
 	def update(self):
 		return
@@ -121,10 +127,9 @@ class Pipe():
 class Goomba():
 	def __init__(self, x, y, w, h, image_url):
 		Sprite.__init__(self, x, y, w, h, image_url)
-		
 		self.onFire = False
 		self.goombaDied = False
-		self.rightFacing = True
+		self.rightFacing = False
 		self.offScreen = False
 		self.xVelocity = 3
 		self.vertVelocity = 1.2
@@ -142,21 +147,18 @@ class Goomba():
 			self.vertVelocity = 0
 			self.y = 400 - self.h
 		
-
 		if(self.onFire):
 			self.xVelocity = 0
-			self.image.src = "goomba_fire.png"
+			self.image = pygame.image.load("goomba_fire.png")
 		
 		while(self.onFire):
-			self.fireCount+1
+			self.fireCount += 1
 			if(self.fireCount < 50):
 				break
 			if(self.fireCount > 50):
 				self.goombaDied = True
 				break
 			
-		        
-	
 
 	def reverseDirection(self, pipe):
 		if(self.x + self.w >= pipe.x and self.prevX + self.w <= pipe.x):
@@ -177,7 +179,6 @@ class Goomba():
 			self.vertVelocity = 0
 		
 	
-
 	def setPreviousPosition(self):
 		self.prevX = self.x
 		self.prevY = self.y    
@@ -202,6 +203,8 @@ class Fireball():
 		Sprite.__init__(self, x, y, w, h, image_url)
 		self.xVelocity = 3
 		self.goingRight = goingRight
+		self.rightFacing = None
+		self.vertVelocity = 1.2
 
 	
 
@@ -233,8 +236,6 @@ class Fireball():
 		return False
 	
 
-
-
 class View():
 	def __init__(self, model):
 		screen_size = (950,500)
@@ -245,21 +246,29 @@ class View():
 		
 	def update(self):
 		scrollpos = self.model.mario.x - 100
+		self.screen.fill([123, 145, 215])
+		resizedGround = pygame.transform.scale(self.ground, (500, 100))
 
-		self.screen.fill([0,200,100])
-		self.screen.blit(self.ground, self.model.rect)
-		pygame.display.flip()
-		
+		#Draw Sprites
 		for i in range(len(self.model.sprites)):
 			sprite = self.model.sprites[i]
-			if(sprite.rightFacing == True and sprite.rightFacing != null):
+			resize = pygame.transform.scale(sprite.image, (sprite.w, sprite.h))
+			#self.screen.blit(resize, (sprite.x - scrollpos, sprite.y))
+			if(sprite.rightFacing == None):
+				self.screen.blit(resize, (sprite.x - scrollpos, sprite.y))
+			elif(sprite.rightFacing == True):
+				self.screen.blit(resize, (sprite.x - scrollpos, sprite.y))
+			elif(sprite.rightFacing == False):
+				flip = pygame.transform.flip(resize, True, False)
+				self.screen.blit(flip, (sprite.x - scrollpos, sprite.y))
 
-			elif(sprite.rightFacing == False and sprite.rightFacing != null):
-			else
-			
-		#ctx.drawImage(ground, 0 - scrollpos, 400, 500, 100)
-		#ctx.drawImage(ground, 500 - scrollpos, 400, 500, 100)
-		#ctx.drawImage(ground, -500 - scrollpos, 400, 500, 100)
+
+		#Draw Ground
+		self.screen.blit(resizedGround, (0 - scrollpos, 400))
+		self.screen.blit(resizedGround, (500 - scrollpos, 400))
+		self.screen.blit(resizedGround, (-500 - scrollpos, 400))
+		pygame.display.flip()
+
 
 class Controller():
 	def __init__(self, model):
@@ -276,24 +285,23 @@ class Controller():
 			elif event.type == KEYDOWN:
 				if event.key == K_ESCAPE:
 					self.keep_going = False
+				if event.key == K_LCTRL and K_RCTRL:
+					self.model.sprites.append(Fireball(self.model.mario.x, self.model.mario.y, 47, 47, "fireball.png", self.model.mario.rightFacing))
 
 		keys = pygame.key.get_pressed()
 		if keys[K_LEFT]:
 			self.model.mario.rightFacing = False
 			self.model.mario.x-=4
 			self.model.mario.changeImageState()
+
 		if keys[K_RIGHT]:
 			self.model.mario.rightFacing = True
 			self.model.mario.x+=4
 			self.model.mario.changeImageState()
+
 		if keys[K_SPACE]:	
 			if(self.model.mario.numFramesInAir < 5):
 				self.model.mario.vertVelocity = -20
-		if keys[K_LCTRL or K_RCTRL]:
-			self.model.sprites.append(Fireball(self.model.mario.x, self.model.mario.y, 47, 47, "fireball.png", self.model.mario.rightFacing))
-			self.keyControl = not self.keyControl
-		  
-	
 
 class Model():
 	def __init__(self):
@@ -325,16 +333,10 @@ class Model():
 					if(check == True and self.sprites[j].isPipe()):
 						self.mario.getOutOfPipe(self.sprites[j])
 					
-
 					#Case 2, Mario hits a goomba
 					if(check == True and self.sprites[i].isGoomba()):
 						self.sprites[i].goombaGameOver()
 					
-				
-			
-			
-
-
 			#GOOMBA COLLISION
 			#Cases 3 and 4
 			if(self.sprites[i].isGoomba()):
@@ -345,12 +347,6 @@ class Model():
 				if((self.sprites[i]).goombaDied == True):
 					self.sprites.pop(i)
 					return
-				
-				# if(((Goomba)sprites.get(i)).offScreen == True)
-				# 
-				# 	sprites.remove(i)
-				# 	return
-				# 
 			
 				for j in range(len(self.sprites)):
 				
@@ -361,20 +357,15 @@ class Model():
 						#Switch Direction
 						(self.sprites[i]).reverseDirection(self.sprites[j])
 					
-
 					#Case 4, Goomba hits a fireball
 					if(check and self.sprites[j].isFireball()):
 					
 						#Set to onfire
 						if(self.sprites[j].isFireball()):
-							self.sprites.pop(j,1)
+							self.sprites.pop(j)
 							self.sprites[i].onFire = True
 							return
 						
-					
-				
-			
-		
 			#FIREBALL COLLISION
 			#Case 5
 			if(self.sprites[i].isFireball()):
@@ -383,35 +374,21 @@ class Model():
 				
 					check = self.isThereACollision(self.sprites[i], self.sprites[j])
 
-					#If the pipe collides with the fireball
-					#if(self.sprites[j].isPipe()):
-						#Pipe collision with fireball
-						#if(self.check == True):
-							#Destroy fireball
-				
 					check2 = self.isOffscreen(self.sprites[i], self.mario.x - 100)
 					
 					if(check2 == True):
-						self.sprites.pop(i, 1)
-						break
-				
-			
-		
-	
+						self.sprites.pop(i)
+						return
 
-	def isOffscreen(a, scrollpos):
+	def isOffscreen(self, a, scrollpos):
 		
 		if(a.x - scrollpos > 950):
 			return True
-		
-
-		if(a.x - scrollpos < - 50):
+		if(a.x - scrollpos < -50):
 			return True
 		else:
 			return False
 		
-	
-
 	#Collision check sprites a and b. Sprites: Mario, Goomba, Pipe, Fireball
 	def isThereACollision(self, a, b):
 	
@@ -441,8 +418,6 @@ class Model():
 		
 	
 
-
-
 print("Use the arrow keys to move. Press Esc to quit.")
 pygame.init()
 m = Model()
@@ -452,6 +427,6 @@ while c.keep_going:
 	c.update()
 	m.update()
 	v.update()
-	sleep(0.04)
+	sleep(0.025)
 print("Goodbye")
 
