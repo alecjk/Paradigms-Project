@@ -412,7 +412,6 @@ class Model():
 			return True
 		
 	
-
 print("Use the arrow keys to move. Press Esc to quit.")
 pygame.init()
 m = Model()
