@@ -1,6 +1,4 @@
 import pygame
-import time
-
 from pygame.locals import*
 from time import sleep
 
@@ -162,7 +160,6 @@ class Goomba():
 
 	def reverseDirection(self, pipe):
 		if(self.x + self.w >= pipe.x and self.prevX + self.w <= pipe.x):
-		
 			self.xVelocity = -self.xVelocity
 			self.rightFacing = not self.rightFacing
 		
@@ -181,20 +178,20 @@ class Goomba():
 	
 	def setPreviousPosition(self):
 		self.prevX = self.x
-		self.prevY = self.y    
-	
+		self.prevY = self.y
+
 	def isGoomba(self):
 		return True
-	
+
 	def isFireball(self):
 		return False
-	
+
 	def isMario(self):
 		return False
-	
+
 	def isPipe(self):
 		return False
-	
+
 
 
 
@@ -206,23 +203,19 @@ class Fireball():
 		self.rightFacing = None
 		self.vertVelocity = 1.2
 
-	
-
 	def update(self):
 		self.vertVelocity += 1.2
 		if(self.goingRight == True):
 			self.x += self.xVelocity
-		
-		if(self.goingRight == False):
+		elif(self.goingRight == False):
 			self.x -= self.xVelocity
 		
-
 		self.y += self.vertVelocity
 
 		if(self.y > 400 - self.h):		
 			self.y = 400 - self.h
 			self.vertVelocity = -15
-		
+
 	def isGoomba(self):
 		return False
 	
@@ -253,7 +246,7 @@ class View():
 		for i in range(len(self.model.sprites)):
 			sprite = self.model.sprites[i]
 			resize = pygame.transform.scale(sprite.image, (sprite.w, sprite.h))
-			#self.screen.blit(resize, (sprite.x - scrollpos, sprite.y))
+
 			if(sprite.rightFacing == None):
 				self.screen.blit(resize, (sprite.x - scrollpos, sprite.y))
 			elif(sprite.rightFacing == True):
@@ -266,7 +259,9 @@ class View():
 		#Draw Ground
 		self.screen.blit(resizedGround, (0 - scrollpos, 400))
 		self.screen.blit(resizedGround, (500 - scrollpos, 400))
-		self.screen.blit(resizedGround, (-500 - scrollpos, 400))
+		self.screen.blit(resizedGround, (-500 - scrollpos, 400))		
+		self.screen.blit(resizedGround, (1000 - scrollpos, 400))
+		self.screen.blit(resizedGround, (-1000 - scrollpos, 400))
 		pygame.display.flip()
 
 
@@ -327,8 +322,8 @@ class Model():
 			if(self.sprites[i].isMario()):
 			
 				for j in range(len(self.sprites)):
-				
 					check = self.isThereACollision(self.sprites[i], self.sprites[j])
+
 					#Case 1, Mario collides with pipe
 					if(check == True and self.sprites[j].isPipe()):
 						self.mario.getOutOfPipe(self.sprites[j])
