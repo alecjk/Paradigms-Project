@@ -271,6 +271,7 @@ class Controller():
 		self.keyRight = False
 		self.keyLeft = False
 		self.keep_going = True
+		self.editmode = False
 
 	def update(self):
 		self.model.mario.setPreviousPosition()
@@ -280,6 +281,8 @@ class Controller():
 			elif event.type == KEYDOWN:
 				if event.key == K_ESCAPE:
 					self.keep_going = False
+				if event.key == K_e:
+					self.editmode = not self.editmode
 				if event.key == K_LCTRL and K_RCTRL:
 					self.model.sprites.append(Fireball(self.model.mario.x, self.model.mario.y, 47, 47, "fireball.png", self.model.mario.rightFacing))
 
@@ -383,7 +386,22 @@ class Model():
 			return True
 		else:
 			return False
-		
+
+	def addPipe(self, mx, my):
+		foundPipe = False
+
+		for i in range(len(self.model.sprites)):
+			if(self.sprites[i].isPipe()):
+				if(self.sprites[i].PipePressed(mx, my) == True):
+					foundPipe = True
+					self.sprites.pop(i)
+
+		if(not foundPipe):
+			self.sprites.append(Pipe(mx, my, 55, 400, "pipe.png"))
+	
+	def addGoomba(self, mx, my):
+		self.sprites.append(Goomba(mx, my, 37, 45, "goomba.png"))
+	
 	#Collision check sprites a and b. Sprites: Mario, Goomba, Pipe, Fireball
 	def isThereACollision(self, a, b):
 	
@@ -422,5 +440,5 @@ while c.keep_going:
 	m.update()
 	v.update()
 	sleep(0.025)
-print("Goodbye")
+print("See ya later chump")
 
