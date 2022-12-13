@@ -1,3 +1,10 @@
+#Python Implementation of Assignment 5
+#Alec Kriesel
+#010852983
+#12/8/22
+#Programming Paradigms, Dr. Lora Streeter
+#game.py contains all the files translated from javascript from assignment7
+
 import pygame
 from pygame.locals import*
 from time import sleep
